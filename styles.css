@@ -79,3 +79,152 @@
 .animate-shake {
     animation: shake 0.3s ease-in-out;
 }
+
+body {
+    background: linear-gradient(180deg, #f5fbff 0%, #edf7ff 38%, #fffdf0 100%);
+    color: #1f2937;
+}
+
+#starfield {
+    opacity: 0.28;
+    filter: saturate(1.2);
+}
+
+body .glass-panel {
+    background: rgba(255, 255, 255, 0.72);
+    border-color: rgba(148, 163, 184, 0.22);
+    box-shadow: 0 12px 30px rgba(59, 130, 246, 0.08);
+}
+
+body .glass-card,
+body .glass-card-blue {
+    background: rgba(255, 255, 255, 0.72);
+    border-color: rgba(148, 163, 184, 0.18);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+}
+
+body .glass-card:hover {
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.2), 0 0 45px rgba(59, 130, 246, 0.12);
+    border-color: rgba(16, 185, 129, 0.35);
+}
+
+body .glass-card-blue:hover {
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.2), 0 0 45px rgba(14, 165, 233, 0.12);
+    border-color: rgba(59, 130, 246, 0.35);
+}
+
+body .text-white,
+body .text-slate-300,
+body .text-slate-400,
+body .text-slate-500,
+body .text-slate-600,
+body .text-slate-700,
+body .text-slate-800 {
+    color: #1f2937 !important;
+}
+
+body .text-slate-400 {
+    color: #475569 !important;
+}
+
+body .text-slate-500,
+body .text-slate-600 {
+    color: #52607a !important;
+}
+
+body .bg-slate-950,
+body .bg-slate-900,
+body .bg-black\/30,
+body .bg-white\/5,
+body .bg-white\/10 {
+    background: rgba(255, 255, 255, 0.7) !important;
+}
+
+body input,
+body select,
+body textarea {
+    background: rgba(255, 255, 255, 0.76) !important;
+    border-color: rgba(148, 163, 184, 0.38) !important;
+    color: #1f2937 !important;
+}
+
+body input::placeholder,
+body select::placeholder,
+body textarea::placeholder {
+    color: #64748b !important;
+}
+
+body .placeholder-slate-500::placeholder {
+    color: #64748b !important;
+}
+
+body .border-white\/10,
+body .border-white\/5,
+body .border-white\/20 {
+    border-color: rgba(148, 163, 184, 0.24) !important;
+}
+
+body .bg-blue-500\/20,
+body .bg-emerald-500\/20,
+body .bg-emerald-500\/10,
+body .bg-blue-500\/10 {
+    background: rgba(255, 255, 255, 0.72) !important;
+}
+
+body .shadow-black\/30,
+body .shadow-black\/20,
+body .shadow-emerald-500\/20,
+body .shadow-blue-500\/20 {
+    box-shadow: 0 12px 24px rgba(59, 130, 246, 0.08) !important;
+}
+
+body .text-blue-400,
+body .text-blue-300,
+body .text-emerald-400,
+body .text-emerald-300 {
+    color: #2563eb !important;
+}
+
+body .bg-gradient-to-r.from-blue-500.to-emerald-500,
+body .bg-gradient-to-tr.from-blue-500.to-emerald-500,
+body .bg-gradient-to-b.from-blue-500.to-emerald-500 {
+    background: linear-gradient(90deg, #60a5fa 0%, #34d399 100%);
+}
+
+body .bg-gradient-to-r.from-emerald-500.to-teal-500,
+body .bg-gradient-to-r.from-blue-500.to-emerald-500 {
+    background: linear-gradient(90deg, #34d399 0%, #38bdf8 100%);
+}
+
+body .bg-gradient-to-r.from-blue-500.to-emerald-500:hover {
+    background: linear-gradient(90deg, #60a5fa 0%, #22c55e 100%);
+}
+
+body .bg-white\/5:hover,
+body .bg-white\/10:hover {
+    background: rgba(255, 255, 255, 0.88) !important;
+}
+
+body .border-blue-500\/40,
+body .border-blue-500\/30,
+body .border-emerald-500\/30,
+body .border-emerald-500\/50 {
+    border-color: rgba(59, 130, 246, 0.28) !important;
+}
+
+body .bg-slate-950\/80,
+body .bg-slate-950\/70,
+body .bg-slate-950\/60 {
+    background: rgba(255, 255, 255, 0.7) !important;
+}
+
+body #modal-container,
+body #admin-login-modal,
+body #loading-overlay {
+    background: rgba(241, 245, 249, 0.75) !important;
+}
+
+body footer {
+    background: rgba(255, 255, 255, 0.46);
+}
+
