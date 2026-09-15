@@ -1,0 +1,81 @@
+/* 1. 自訂反重力懸浮動畫 */
+@keyframes float-antigravity {
+
+    0%,
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-8px) rotate(0.4deg);
+    }
+}
+
+.animate-float-1 {
+    animation: float-antigravity 5.5s ease-in-out infinite;
+}
+
+.animate-float-2 {
+    animation: float-antigravity 6.8s ease-in-out infinite 0.4s;
+}
+
+.animate-float-3 {
+    animation: float-antigravity 7.5s ease-in-out infinite 0.8s;
+}
+
+/* 2. 毛玻璃特效 */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 3. 霓虹發光 Hover 回饋 */
+.glass-card:hover {
+    transform: translateY(-10px) scale(1.01);
+    box-shadow: 0 0 25px rgba(34, 197, 94, 0.35), 0 0 50px rgba(59, 130, 246, 0.15);
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+.glass-card-blue:hover {
+    transform: translateY(-10px) scale(1.01);
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.35), 0 0 50px rgba(16, 185, 129, 0.15);
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+/* 自訂滾動條 */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* 4. 錯誤密碼搖晃動畫 */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+.animate-shake {
+    animation: shake 0.3s ease-in-out;
+}

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>反重力懸浮宇宙餐廳 - 智慧點餐系統</title>
+    <!-- 引入 Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 載入 Google 字型：Outfit (數字與英文) 與 Noto Sans TC (中文) -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body
+    class="bg-slate-950 text-white min-h-screen relative overflow-x-hidden font-sans flex flex-col selection:bg-emerald-500/30 selection:text-emerald-300">
+
+    <!-- 背景動態星空 Canvas -->
+    <canvas id="starfield" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <!-- 半透明發光漸層星雲 -->
+    <div
+        class="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[45vw] h-[45vw] max-w-[600px] max-h-[600px] rounded-full bg-blue-500/10 blur-[130px] pointer-events-none z-0">
+    </div>
+    <div
+        class="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[55vw] h-[55vw] max-w-[700px] max-h-[700px] rounded-full bg-emerald-500/10 blur-[150px] pointer-events-none z-0">
+    </div>
+
+    <div class="relative z-10 flex-grow flex flex-col">
+        <!-- 頂部導覽列 -->
+        <header
+            class="glass-panel sticky top-0 z-40 border-b border-white/5 py-4 px-6 md:px-12 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-blue-500/20 animate-spin-slow">
+                    <i class="fa-solid fa-satellite-dish text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1
+                        class="text-xl font-bold tracking-wider bg-gradient-to-r from-blue-400 via-emerald-400 to-teal-300 bg-clip-text text-transparent">
+                        反重力懸浮宇宙餐廳
+                    </h1>
+                    <p class="text-[10px] text-slate-400 tracking-widest uppercase">Intelligent Ordering System</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- 管理員帳號標籤 (登入後顯示) -->
+                <div id="admin-user-badge" class="hidden px-4 py-2 rounded-full glass-panel border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 flex items-center gap-2 text-sm font-medium shadow-md shadow-emerald-500/5 transition-all duration-300">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span>管理員: <span id="admin-username-display" class="font-mono text-white"></span></span>
+                </div>
+                <!-- 同步選單按鈕 -->
+                <button id="btn-sync" onclick="fetchDishes()"
+                    class="px-4 py-2 rounded-full glass-panel border border-white/10 hover:border-blue-500/30 hover:bg-blue-500/10 text-slate-300 hover:text-blue-400 transition-all duration-300 flex items-center gap-2 text-sm font-medium shadow-md shadow-black/20">
+                    <i class="fa-solid fa-rotate"></i>
+                    <span>同步選單</span>
+                </button>
+                <!-- 模式切換按鈕 -->
+                <button id="btn-toggle-admin" onclick="toggleAdminMode()"
+                    class="px-5 py-2 rounded-full glass-panel border border-white/10 hover:border-emerald-500/30 hover:bg-emerald-500/10 text-slate-300 hover:text-emerald-400 transition-all duration-300 flex items-center gap-2 text-sm font-medium shadow-md shadow-black/20">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>切換為管理員模式</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 管理員「新增餐點表單」區塊 (預設隱藏，使用 max-h 滑動展示) -->
+        <div id="admin-form-container"
+            class="max-h-0 overflow-hidden transition-all duration-500 ease-in-out glass-panel mx-6 md:mx-12 mt-6 rounded-2xl relative z-30">
+            <div class="p-6">
+                <h3 class="text-lg font-bold text-emerald-400 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-plus"></i>
+                    新增星際餐點品項
+                </h3>
+                <form id="add-dish-form" onsubmit="handleAddDish(event)"
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs text-slate-400 font-medium">餐點名稱</label>
+                        <input type="text" id="form-name" required placeholder="例：星雲分子慕斯"
+                            class="bg-white/5 border border-white/10 focus:border-emerald-500/50 focus:outline-none rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 transition-all">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs text-slate-400 font-medium">餐點分類</label>
+                        <select id="form-category"
+                            class="bg-slate-900 border border-white/10 focus:border-emerald-500/50 focus:outline-none rounded-lg px-3 py-2 text-sm text-white transition-all">
+                            <option value="main">主食</option>
+                            <option value="side">副食</option>
+                            <option value="drink">飲料</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs text-slate-400 font-medium">價格 (TWD)</label>
+                        <input type="number" id="form-price" min="0" required placeholder="例：250"
+                            class="bg-white/5 border border-white/10 focus:border-emerald-500/50 focus:outline-none rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 transition-all">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs text-slate-400 font-medium">圖片網址</label>
+                        <input type="url" id="form-image" placeholder="輸入圖片 URL (留空使用預設圖)"
+                            class="bg-white/5 border border-white/10 focus:border-emerald-500/50 focus:outline-none rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 transition-all">
+                    </div>
+                    <button type="submit"
+                        class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold py-2 rounded-lg transition-all shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/20 text-sm h-[38px] flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-plus"></i> 新增餐點
+                    </button>
+                    <div class="flex flex-col gap-1.5 md:col-span-2 lg:col-span-4">
+                        <label class="text-xs text-slate-400 font-medium">餐點描述</label>
+                        <input type="text" id="form-description" required placeholder="請輸入餐點的特色，例如：帶有乾冰霧氣效果的低溫分子甜點。"
+                            class="bg-white/5 border border-white/10 focus:border-emerald-500/50 focus:outline-none rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 transition-all">
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 主要內容區：左側菜單、右側點餐單 -->
+        <main class="flex-grow p-6 md:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
+            <!-- 左側菜單區 (佔 8 欄) -->
+            <section class="lg:col-span-8 flex flex-col gap-6">
+                <!-- 菜單篩選 Tab 與資訊 -->
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold tracking-wide flex items-center gap-2">
+                            <span
+                                class="inline-block w-2.5 h-6 bg-gradient-to-b from-blue-500 to-emerald-500 rounded-full"></span>
+                            星際選單
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-1">選取餐點，加入您的反重力漂浮餐籃</p>
+                    </div>
+                    <!-- 分類選擇器 -->
+                    <div class="flex p-1 rounded-full glass-panel border border-white/5">
+                        <button onclick="setCategory('all')" id="tab-all"
+                            class="px-4 py-1.5 text-xs font-semibold rounded-full bg-white/10 text-white transition-all">全部</button>
+                        <button onclick="setCategory('main')" id="tab-main"
+                            class="px-4 py-1.5 text-xs font-semibold rounded-full text-slate-400 hover:text-white transition-all">主食</button>
+                        <button onclick="setCategory('side')" id="tab-side"
+                            class="px-4 py-1.5 text-xs font-semibold rounded-full text-slate-400 hover:text-white transition-all">副食</button>
+                        <button onclick="setCategory('drink')" id="tab-drink"
+                            class="px-4 py-1.5 text-xs font-semibold rounded-full text-slate-400 hover:text-white transition-all">飲料</button>
+                    </div>
+                </div>
+
+                <!-- 菜單網格 -->
+                <div id="menu-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <!-- 卡片元件會在此處透過 JavaScript 動態載入 -->
+                </div>
+            </section>
+
+            <!-- 右側購物車點餐單 (佔 4 欄) -->
+            <section class="lg:col-span-4 flex flex-col h-full">
+                <div
+                    class="glass-panel rounded-2xl p-6 flex flex-col h-full sticky top-[90px] max-h-[calc(100vh-140px)] shadow-xl shadow-black/30 border border-white/10 relative overflow-hidden">
+                    <!-- 邊角裝飾光源 -->
+                    <div
+                        class="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-xl pointer-events-none">
+                    </div>
+
+                    <!-- 購物車標頭 -->
+                    <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                        <h2 class="text-lg font-bold flex items-center gap-2 text-blue-400">
+                            <i class="fa-solid fa-basket-shopping"></i>
+                            太空點餐籃
+                        </h2>
+                        <span id="cart-count-badge"
+                            class="bg-blue-500/20 border border-blue-500/40 text-blue-300 text-xs px-2.5 py-0.5 rounded-full font-mono">0
+                            個品項</span>
+                    </div>
+
+                    <!-- 購物車項目清單 (有滾動條) -->
+                    <div id="cart-items-container" class="flex-grow overflow-y-auto my-4 space-y-4 pr-1">
+                        <!-- 空購物車預設狀態 -->
+                        <div id="cart-empty"
+                            class="flex flex-col items-center justify-center py-12 text-slate-500 text-center gap-3">
+                            <!-- 宇航員/幽浮造型的 SVG -->
+                            <svg class="w-20 h-20 text-slate-600 animate-float-2 opacity-60" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            </svg>
+                            <p class="text-sm font-medium">您的太空餐籃目前是空的</p>
+                            <p class="text-xs text-slate-600">快前往左側星際選單加入美味餐點！</p>
+                        </div>
+
+                        <!-- 購物車項目會動態生成 -->
+                        <div id="cart-list" class="hidden space-y-3"></div>
+                    </div>
+
+                    <!-- 顧客資訊與結帳區 -->
+                    <div id="cart-footer" class="hidden pt-4 border-t border-white/10 space-y-4">
+                        <!-- 顧客姓名輸入 -->
+                        <div class="flex flex-col gap-1.5">
+                            <label for="customer-name"
+                                class="text-xs text-slate-400 flex items-center gap-1 font-medium">
+                                <i class="fa-regular fa-user"></i> 顧客姓名
+                            </label>
+                            <input type="text" id="customer-name" placeholder="請輸入本機艙使用者姓名"
+                                class="bg-white/5 border border-white/10 focus:border-blue-500/50 focus:outline-none rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 transition-all">
+                        </div>
+
+                        <!-- 費用小計 -->
+                        <div class="space-y-1.5 font-mono">
+                            <div class="flex justify-between text-xs text-slate-400">
+                                <span>餐點小計</span>
+                                <span id="cart-subtotal">TWD 0</span>
+                            </div>
+                            <div class="flex justify-between text-xs text-slate-400">
+                                <span>星際重力稅 (0%)</span>
+                                <span>TWD 0</span>
+                            </div>
+                            <div class="flex justify-between text-base font-bold text-white pt-1">
+                                <span class="font-sans text-sm">應付總額</span>
+                                <span id="cart-total" class="text-blue-400">TWD 0</span>
+                            </div>
+                        </div>
+
+                        <!-- 確認送出按鈕 -->
+                        <button onclick="submitOrder()"
+                            class="w-full bg-gradient-to-r from-blue-500 to-emerald-500 hover:from-blue-400 hover:to-emerald-400 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 shadow-md shadow-blue-500/20 hover:shadow-emerald-500/30 flex items-center justify-center gap-2 group">
+                            <span>傳送至星際廚房</span>
+                            <i
+                                class="fa-solid fa-paper-plane group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 頁尾 -->
+        <footer
+            class="glass-panel border-t border-white/5 text-center py-4 text-xs text-slate-500 relative z-10 mt-auto">
+            <p>© 2026 反重力懸浮宇宙餐廳 Antigravity Space Restaurant. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- 全局霓虹 Loading 載入動畫遮罩 -->
+    <div id="loading-overlay"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex flex-col items-center justify-center gap-4 transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div class="relative w-20 h-20">
+            <!-- 內圓軌道 -->
+            <div class="absolute inset-0 rounded-full border-4 border-white/5"></div>
+            <!-- 外圈漸層旋轉 -->
+            <div
+                class="absolute inset-0 rounded-full border-4 border-transparent border-t-emerald-400 border-r-blue-400 animate-spin">
+            </div>
+            <!-- 星球中心點 -->
+            <div
+                class="absolute inset-4 rounded-full bg-gradient-to-tr from-blue-500 to-emerald-500 blur-[2px] opacity-80 animate-pulse">
+            </div>
+        </div>
+        <p id="loading-text" class="text-slate-300 text-sm font-semibold tracking-widest mt-2 animate-pulse">
+            正在連結星際伺服器...</p>
+    </div>
+
+    <!-- 自訂美化對話框 (Modal) -->
+    <div id="modal-container"
+        class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div
+            class="glass-panel max-w-sm w-full rounded-2xl border border-white/10 p-6 flex flex-col items-center text-center shadow-2xl shadow-black/50 animate-float-1">
+            <div id="modal-icon" class="w-16 h-16 rounded-full flex items-center justify-center mb-4 text-2xl"></div>
+            <h3 id="modal-title" class="text-lg font-bold text-white mb-2">標題</h3>
+            <p id="modal-message" class="text-sm text-slate-400 mb-6">說明內容</p>
+            <button onclick="closeModal()"
+                class="w-full bg-white/10 hover:bg-white/20 border border-white/10 hover:border-white/20 text-white font-medium py-2 rounded-xl transition-all">
+                確認接收
+            </button>
+        </div>
+    </div>
+
+    <!-- 管理員登入對話框 (Admin Login Modal) -->
+    <div id="admin-login-modal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-all duration-300 opacity-0 pointer-events-none">
+        <div id="login-modal-box"
+            class="glass-panel max-w-sm w-full rounded-2xl border border-white/10 p-6 flex flex-col shadow-2xl shadow-emerald-500/5 relative overflow-hidden transition-all duration-300 transform scale-95">
+            <!-- 裝飾光源 -->
+            <div class="absolute -top-12 -right-12 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none"></div>
+            
+            <h3 class="text-lg font-bold text-emerald-400 mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved"></i>
+                管理員憑證驗證
+            </h3>
+            <p class="text-xs text-slate-400 mb-6">請輸入星際管理員帳號與密碼以解鎖管理模式</p>
+            
+            <div class="space-y-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs text-slate-400 font-medium">管理員帳號</label>
+                    <input type="text" id="login-username" placeholder="請輸入帳號" onkeydown="if(event.key === 'Enter') submitAdminLogin()"
+                        class="bg-white/5 border border-white/10 focus:border-emerald-500/50 focus:outline-none rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 transition-all">
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs text-slate-400 font-medium">管理員密碼</label>
+                    <input type="password" id="login-password" placeholder="請輸入密碼" onkeydown="if(event.key === 'Enter') submitAdminLogin()"
+                        class="bg-white/5 border border-white/10 focus:border-emerald-500/50 focus:outline-none rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 transition-all">
+                </div>
+                <div id="login-error-msg" class="text-xs text-rose-400 hidden mt-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>帳號或密碼錯誤，請重新輸入！</span>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeLoginModal()"
+                    class="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-medium py-2 rounded-xl text-sm transition-all">
+                    取消
+                </button>
+                <button onclick="submitAdminLogin()"
+                    class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold py-2 rounded-xl text-sm transition-all shadow-md shadow-emerald-500/20">
+                    登入驗證
+                </button>
+            </div>
+            
+            <!-- 測試指引提示 -->
+            <p class="text-[10px] text-slate-500 text-center mt-4">測試憑證：帳號 <span class="text-slate-400 font-mono">admin</span> / 密碼 <span class="text-slate-400 font-mono">admin123</span></p>
+        </div>
+    </div>
+
+
+    <script src="script.js"></script>
+</body>
+
+</html>
